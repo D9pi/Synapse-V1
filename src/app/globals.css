@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+/* ---------- Theme tokens ---------- */
+:root,
+[data-theme="onyx"] {
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #121212;
+  --surface-3: #1b1b1b;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --fg: #ffffff;
+  --muted: #8d8d8d;
+  --faint: #4a4a4a;
+  --invert: #ffffff;
+  --invert-fg: #000000;
+  --good: #e8e8e8;
+  --bad: #9a9a9a;
+  --glow: rgba(255, 255, 255, 0.55);
+  color-scheme: dark;
+}
+
+[data-theme="graphite"] {
+  --bg: #111112;
+  --surface: #18181a;
+  --surface-2: #202023;
+  --surface-3: #2a2a2e;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --fg: #f2f2f2;
+  --muted: #8f8f94;
+  --faint: #4d4d52;
+  --invert: #f2f2f2;
+  --invert-fg: #111112;
+  --glow: rgba(255, 255, 255, 0.45);
+  color-scheme: dark;
+}
+
+[data-theme="paper"] {
+  --bg: #f5f5f3;
+  --surface: #ffffff;
+  --surface-2: #efefec;
+  --surface-3: #e5e5e1;
+  --line: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.18);
+  --fg: #0a0a0a;
+  --muted: #6b6b6b;
+  --faint: #b5b5b0;
+  --invert: #0a0a0a;
+  --invert-fg: #ffffff;
+  --glow: rgba(0, 0, 0, 0.35);
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-invert: var(--invert);
+  --color-invert-fg: var(--invert-fg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--faint) transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ---------- Utilities ---------- */
+.label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.sheen {
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    color-mix(in srgb, var(--fg) 7%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
+  animation: sheen 2.2s linear infinite;
+}
+
+@keyframes sheen {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Flashcard 3D flip */
+.flip-scene {
+  perspective: 1600px;
+}
+.flip-card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.flip-card.flipped {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* Prose for AI / guide text */
+.prose-syn p {
+  margin: 0.5em 0;
+  line-height: 1.65;
+}
+.prose-syn ul,
+.prose-syn ol {
+  margin: 0.5em 0;
+  padding-left: 1.25em;
+}
+.prose-syn ul {
+  list-style: disc;
+}
+.prose-syn ol {
+  list-style: decimal;
+}
+.prose-syn li {
+  margin: 0.25em 0;
+  line-height: 1.6;
+}
+.prose-syn li::marker {
+  color: var(--muted);
+}
+.prose-syn h1,
+.prose-syn h2,
+.prose-syn h3 {
+  font-weight: 600;
+  margin: 1em 0 0.4em;
+  letter-spacing: -0.01em;
+}
+.prose-syn h1 {
+  font-size: 1.15em;
+}
+.prose-syn h2 {
+  font-size: 1.05em;
+}
+.prose-syn h3 {
+  font-size: 1em;
+}
+.prose-syn code {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.88em;
+  background: var(--surface-3);
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+}
+.prose-syn pre {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 0.75em 1em;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin: 0.6em 0;
+}
+.prose-syn pre code {
+  background: none;
+  padding: 0;
+}
+.prose-syn strong {
+  font-weight: 600;
+}
+.prose-syn hr {
+  border-color: var(--line);
+  margin: 1em 0;
+}
+.prose-syn > :first-child {
+  margin-top: 0;
+}
+.prose-syn > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
