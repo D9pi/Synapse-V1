@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { addKeyHint, aiEnabled, describeError, generateKitAI } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, describeError, generateKit, provider } from "@/lib/ai/engine";
 import { normalizeKit } from "@/lib/ai/normalize";
 import { generateOfflineKit } from "@/lib/offline";
 
-export const maxDuration = 300;
+// Local AI generates concept by concept and can take several minutes on a laptop.
+export const maxDuration = 900;
 
 const Body = z.object({
   subjectName: z.string().min(1).max(120),
@@ -22,8 +23,8 @@ export async function POST(req: Request) {
 
   if (aiEnabled()) {
     try {
-      const raw = await generateKitAI(subjectName, material);
-      return Response.json({ kit: normalizeKit(raw, "ai") });
+      const raw = await generateKit(subjectName, material);
+      return Response.json({ kit: normalizeKit(raw, "ai"), engine: provider() });
     } catch (err) {
       const e = describeError(err);
       console.error("[generate] AI failed, using offline generator:", e.message);

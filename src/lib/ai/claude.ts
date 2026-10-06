@@ -2,18 +2,14 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { KitSchema, QuestionBatchSchema, GradeSchema, type RawKit } from "./schema";
+import { AIError } from "./errors";
 
 export const MODEL = process.env.SYNAPSE_MODEL || "claude-opus-5-5";
 const BETAS = ["server-side-fallback-2026-07-01"];
 
 let client: Anthropic | null = null;
 
-/** How to turn AI on, phrased for where the app is running. */
-export function addKeyHint(): string {
-  return process.env.SYNAPSE_DESKTOP ? "Add your Anthropic API key in Settings" : "Add ANTHROPIC_API_KEY to .env.local";
-}
-
-export function aiEnabled(): boolean {
+export function claudeConfigured(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 }
 
@@ -22,17 +18,8 @@ function getClient(): Anthropic {
   return client;
 }
 
-export class AIError extends Error {
-  constructor(
-    message: string,
-    public status = 502,
-  ) {
-    super(message);
-  }
-}
-
 /** Maps SDK errors to user-presentable messages. */
-export function describeError(err: unknown): AIError {
+export function describeClaudeError(err: unknown): AIError {
   if (err instanceof AIError) return err;
   if (err instanceof Anthropic.AuthenticationError) return new AIError(`The AI key was rejected. ${process.env.SYNAPSE_DESKTOP ? "Check it in Settings." : "Check ANTHROPIC_API_KEY."}`, 401);
   if (err instanceof Anthropic.RateLimitError) return new AIError("The AI is rate limited right now. Try again in a moment.", 429);
@@ -166,7 +153,7 @@ export async function extractDocumentAI(base64: string, mediaType: "application/
   return msg.content.map((b) => (b.type === "text" ? b.text : "")).join("").trim();
 }
 
-const ASSISTANT_SYSTEM = `You are Synapse, a personal AI tutor inside a gamified study app. You are not a generic chatbot: you have the student's current course, study guide, flashcards, mastery levels, quiz history, and recent mistakes (provided in <student_context>). Use them.
+export const ASSISTANT_SYSTEM = `You are Synapse, a personal AI tutor inside a gamified study app. You are not a generic chatbot: you have the student's current course, study guide, flashcards, mastery levels, quiz history, and recent mistakes (provided in <student_context>). Use them.
 
 How to tutor:
 - Tailor everything to this student's data. Reference their weak concepts and specific mistakes by name when relevant. If they ask "why did I get this wrong", look at their recent mistakes and explain the misconception behind their chosen answer.
@@ -178,8 +165,13 @@ How to tutor:
 - Stay grounded in their material. If something isn't covered there, you may teach it but say it goes beyond their notes.
 - Never claim the app's "brain regions" are real neuroscience; they're a game mechanic.`;
 
-export function streamAssistant(context: string, messages: Anthropic.Beta.BetaMessageParam[]) {
-  return getClient().beta.messages.stream({
+/** Streams the tutor's reply as text chunks. */
+export async function* streamAssistantClaude(
+  context: string,
+  messages: Anthropic.Beta.BetaMessageParam[],
+  signal: AbortSignal,
+): AsyncGenerator<string> {
+  const stream = getClient().beta.messages.stream({
     model: MODEL,
     max_tokens: 8000,
     betas: BETAS,
@@ -191,4 +183,10 @@ export function streamAssistant(context: string, messages: Anthropic.Beta.BetaMe
     ],
     messages,
   });
+  signal.addEventListener("abort", () => stream.abort());
+  for await (const event of stream) {
+    if (event.type === "content_block_delta" && event.delta.type === "text_delta") yield event.delta.text;
+  }
+  const final = await stream.finalMessage();
+  if (final.stop_reason === "refusal") yield "\n\n_I can't help with that one. Let's get back to your material._";
 }

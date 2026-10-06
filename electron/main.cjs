@@ -120,9 +120,22 @@ function saveApiKey(key) {
   writeJsonAtomic(settingsFile(), s);
 }
 
+/** "anthropic" | "ollama" | "off" | undefined (auto: Claude if a key is saved). */
+function getProvider() {
+  const p = readSettings().provider;
+  return p === "anthropic" || p === "ollama" || p === "off" ? p : null;
+}
+
+function updateSettings(patch) {
+  writeJsonAtomic(settingsFile(), { ...readSettings(), ...patch });
+}
+
 ipcMain.handle("settings:get", () => {
   const key = getApiKey();
+  const s = readSettings();
   return {
+    provider: getProvider() ?? (key ? "anthropic" : "off"),
+    ollamaModel: s.ollamaModel || null,
     hasKey: Boolean(key),
     keyHint: key ? `…${key.slice(-4)}` : null,
     encrypted: Boolean(readSettings().encrypted),
@@ -135,6 +148,19 @@ ipcMain.handle("settings:get", () => {
 ipcMain.handle("settings:setKey", async (_e, key) => {
   const clean = typeof key === "string" ? key.trim() : "";
   saveApiKey(clean || null);
+  // Saving a key switches to Claude; removing it turns AI off unless Local AI is chosen.
+  if (clean) updateSettings({ provider: "anthropic" });
+  else if (getProvider() === "anthropic") updateSettings({ provider: "off" });
+  await restartServer();
+  return { ok: true };
+});
+
+ipcMain.handle("settings:setAI", async (_e, opts) => {
+  const provider = opts?.provider;
+  if (provider !== "anthropic" && provider !== "ollama" && provider !== "off") throw new Error("Unknown AI engine");
+  const patch = { provider };
+  if (typeof opts.ollamaModel === "string" && /^[\w.\-/:]+$/.test(opts.ollamaModel)) patch.ollamaModel = opts.ollamaModel;
+  updateSettings(patch);
   await restartServer();
   return { ok: true };
 });
@@ -197,6 +223,10 @@ async function startServer() {
   };
   const key = getApiKey();
   if (key) env.ANTHROPIC_API_KEY = key;
+  const provider = getProvider();
+  if (provider) env.SYNAPSE_AI_PROVIDER = provider;
+  const ollamaModel = readSettings().ollamaModel;
+  if (ollamaModel) env.OLLAMA_MODEL = ollamaModel;
 
   fs.mkdirSync(userData(), { recursive: true });
   const log = fs.createWriteStream(logFile(), { flags: "a" });

@@ -7,11 +7,12 @@ import { desktop } from "@/lib/desktop";
 
 interface AIState {
   ai: boolean;
+  provider: "anthropic" | "ollama" | null;
   model: string | null;
   checked: boolean;
   isDesktop: boolean;
 }
-const AIContext = createContext<AIState>({ ai: false, model: null, checked: false, isDesktop: false });
+const AIContext = createContext<AIState>({ ai: false, provider: null, model: null, checked: false, isDesktop: false });
 export const useAI = () => useContext(AIContext);
 
 const noopSubscribe = () => () => {};
@@ -19,7 +20,7 @@ const noopSubscribe = () => () => {};
 export function Providers({ children }: { children: React.ReactNode }) {
   // false during SSR/hydration, true on the client: progress lives in localStorage.
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
-  const [ai, setAi] = useState<Omit<AIState, "isDesktop">>({ ai: false, model: null, checked: false });
+  const [ai, setAi] = useState<Omit<AIState, "isDesktop">>({ ai: false, provider: null, model: null, checked: false });
   const isDesktop = useSyncExternalStore(noopSubscribe, () => desktop() !== null, () => false);
   const theme = useStore((s) => s.player.theme);
 

@@ -1,6 +1,10 @@
 // Typed access to the Electron preload bridge. Undefined when running in a normal browser.
 
+export type AIProvider = "anthropic" | "ollama" | "off";
+
 export interface DesktopSettings {
+  provider: AIProvider;
+  ollamaModel: string | null;
   hasKey: boolean;
   keyHint: string | null;
   encrypted: boolean;
@@ -18,6 +22,7 @@ export interface DesktopBridge {
   };
   getSettings: () => Promise<DesktopSettings>;
   setApiKey: (key: string | null) => Promise<{ ok: boolean }>;
+  setAI: (opts: { provider: AIProvider; ollamaModel?: string }) => Promise<{ ok: boolean }>;
   openDataFolder: () => Promise<string>;
 }
 

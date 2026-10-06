@@ -10,5 +10,6 @@ contextBridge.exposeInMainWorld("synapseDesktop", {
   },
   getSettings: () => ipcRenderer.invoke("settings:get"),
   setApiKey: (key) => ipcRenderer.invoke("settings:setKey", key),
+  setAI: (opts) => ipcRenderer.invoke("settings:setAI", opts),
   openDataFolder: () => ipcRenderer.invoke("app:openDataFolder"),
 });

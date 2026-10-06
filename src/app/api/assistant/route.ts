@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addKeyHint, aiEnabled, describeError, streamAssistant } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, assistantStream, describeError } from "@/lib/ai/engine";
 
 export const maxDuration = 120;
 
@@ -35,16 +35,8 @@ export async function POST(req: Request) {
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        const stream = streamAssistant(parsed.data.context, messages);
-        req.signal.addEventListener("abort", () => stream.abort());
-        for await (const event of stream) {
-          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-            controller.enqueue(encoder.encode(event.delta.text));
-          }
-        }
-        const final = await stream.finalMessage();
-        if (final.stop_reason === "refusal") {
-          controller.enqueue(encoder.encode("\n\n_I can't help with that one. Let's get back to your material._"));
+        for await (const text of assistantStream(parsed.data.context, messages, req.signal)) {
+          controller.enqueue(encoder.encode(text));
         }
       } catch (err) {
         if (!req.signal.aborted) {

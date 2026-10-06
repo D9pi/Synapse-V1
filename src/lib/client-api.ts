@@ -19,12 +19,12 @@ async function post<T>(url: string, body: unknown, signal?: AbortSignal): Promis
 }
 
 export const api = {
-  status: async (): Promise<{ ai: boolean; model: string | null }> => {
+  status: async (): Promise<{ ai: boolean; provider: "anthropic" | "ollama" | null; model: string | null }> => {
     try {
       const r = await fetch("/api/status", { cache: "no-store" });
       return await r.json();
     } catch {
-      return { ai: false, model: null };
+      return { ai: false, provider: null, model: null };
     }
   },
   generate: (subjectName: string, material: string, offlineMaterial: string, signal?: AbortSignal) =>

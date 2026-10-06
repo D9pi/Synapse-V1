@@ -21,6 +21,16 @@ npm run dist          # builds an installer for the computer you're on, into rel
 
 To try it without building an installer, run `npm run desktop`.
 
+### Free AI (Local AI)
+
+You don't need a paid API key. In **Settings → AI → Local AI**, Synapse connects to [Ollama](https://ollama.com), a free app that runs open-source AI models on your own computer:
+
+1. Install Ollama from [ollama.com/download](https://ollama.com/download) and open it.
+2. In Synapse, go to **Settings → AI → Local AI** and click **Download** on a model. Use `gemma3:4b` for 8 GB of RAM, or `qwen2.5:7b` for 16 GB or more.
+3. That's it. Study kits, the tutor, Challenge questions, and grading all run locally, for free and offline.
+
+Local models are slower and less accurate than Claude, and a study kit can take a few minutes to build. Reading PDFs still needs Claude, so paste the text instead.
+
 **Or download a prebuilt installer:** every push runs the *Desktop app* GitHub Action, which builds all three installers. Open the run under the repo's **Actions** tab and download them from **Artifacts**. Pushing a `v*` tag publishes them as a Release.
 
 The builds aren't signed with paid Apple or Microsoft certificates, so the first launch shows a warning:
@@ -56,7 +66,8 @@ With no API key, everything still works: an offline generator builds study kits 
 - **Desktop shell** (`electron/`): `main.cjs` starts the Next.js standalone server in a background process on `127.0.0.1` and loads it in a native window. It stores progress in `synapse-data.json` in the app-data folder and the API key in `settings.json`, encrypted with `safeStorage`. `preload.cjs` exposes a small, explicit bridge to the UI. `scripts/after-pack.cjs` copies the server bundle into the packaged app.
 - **State:** a single Zustand store (`src/lib/store.ts`) persisted to `localStorage`. All XP goes through one `grant()` path, which raises level-up, achievement, and mastery events for the UI.
 - **Domain logic** is in pure modules: `levels.ts` (curves and titles), `xp.ts` (economy), `adaptive.ts` (mastery and question selection), `recommend.ts` (the answer to "what should I study now?"), and `achievements.ts`
-- **AI** runs server-side only (`src/lib/ai/claude.ts`) through the Anthropic SDK, using structured outputs validated against Zod schemas (`src/lib/ai/schema.ts`). Responses are normalised into the app's id-based model (`normalize.ts`).
+- **AI engines** (`src/lib/ai/engine.ts`) send each feature either to Claude (`claude.ts`) or to free local models through Ollama (`ollama.ts`). Small local models build the kit in steps (outline first, then one concept at a time), and every response is checked and reshaped before use.
+- **Claude** runs server-side only (`src/lib/ai/claude.ts`) through the Anthropic SDK, using structured outputs validated against Zod schemas (`src/lib/ai/schema.ts`). Responses are normalised into the app's id-based model (`normalize.ts`).
 - **API routes:** `/api/generate`, `/api/questions`, `/api/grade`, `/api/extract` (PDF to notes), `/api/assistant` (streaming), `/api/status`. Each one falls back gracefully when AI is unavailable or fails.
 - **Offline generator** (`src/lib/offline.ts`): heuristic extraction of headings, definitions, formulas, steps, examples, and mistakes, plus MCQ distractor generation
 

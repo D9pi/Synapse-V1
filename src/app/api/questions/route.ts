@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { aiEnabled, describeError, generateQuestionsAI } from "@/lib/ai/claude";
+import { aiEnabled, describeError, generateQuestions } from "@/lib/ai/engine";
 import { normalizeMcq } from "@/lib/ai/normalize";
 import type { MCQ } from "@/lib/types";
 
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   // Use concept ids directly as keys so the model's references map straight back.
   const keyToId = new Map(b.concepts.map((c) => [c.id, c.id]));
   try {
-    const raw = await generateQuestionsAI({
+    const raw = await generateQuestions({
       subjectName: b.subjectName,
       context: b.context,
       concepts: b.concepts.map((c) => ({ key: c.id, name: c.name, mastery: c.mastery })),

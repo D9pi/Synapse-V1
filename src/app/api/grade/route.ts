@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { aiEnabled, describeError, gradeAI } from "@/lib/ai/claude";
+import { aiEnabled, describeError, grade } from "@/lib/ai/engine";
 import { gradeOffline } from "@/lib/offline";
 
 const Body = z.object({
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const { question, expected, given } = parsed.data;
   if (aiEnabled()) {
     try {
-      return Response.json(await gradeAI(question, expected, given));
+      return Response.json(await grade(question, expected, given));
     } catch (err) {
       console.error("[grade]", describeError(err).message);
     }

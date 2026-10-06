@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { addKeyHint, aiEnabled, describeError, extractDocumentAI } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, describeError, extractDocument } from "@/lib/ai/engine";
 
 export const maxDuration = 300;
 
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     );
   }
   try {
-    const text = await extractDocumentAI(parsed.data.data, parsed.data.mediaType);
+    const text = await extractDocument(parsed.data.data, parsed.data.mediaType);
     if (!text) return Response.json({ error: "No readable text was found in that document." }, { status: 422 });
     return Response.json({ text });
   } catch (err) {

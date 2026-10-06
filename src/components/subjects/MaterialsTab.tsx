@@ -55,7 +55,7 @@ export function MaterialsTab({ subject, autogen, onGenerated }: { subject: Subje
   const addMaterial = useStore((s) => s.addMaterial);
   const removeMaterial = useStore((s) => s.removeMaterial);
   const setKit = useStore((s) => s.setKit);
-  const { ai } = useAI();
+  const { ai, provider, model } = useAI();
 
   const [kind, setKind] = useState<MaterialKind>("notes");
   const [title, setTitle] = useState("");
@@ -74,9 +74,9 @@ export function MaterialsTab({ subject, autogen, onGenerated }: { subject: Subje
 
   useEffect(() => {
     if (!generating) return;
-    const t = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), ai ? 6000 : 500);
+    const t = setInterval(() => setStage((s) => Math.min(s + 1, STAGES.length - 1)), !ai ? 500 : provider === "ollama" ? 25000 : 6000);
     return () => clearInterval(t);
-  }, [generating, ai]);
+  }, [generating, ai, provider]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -264,7 +264,7 @@ export function MaterialsTab({ subject, autogen, onGenerated }: { subject: Subje
                       : "The AI will reorganize your material into a study guide, key concepts, definitions, formulas, flashcards, quizzes, practice problems, and a study plan."}
                   </p>
                   <p className="mt-2 font-mono text-[11px] text-faint">
-                    {totalChars.toLocaleString()} chars · {ai ? "AI generation" : "offline generator (no API key)"}
+                    {totalChars.toLocaleString()} chars · {!ai ? "offline generator (AI is off)" : provider === "ollama" ? `Local AI (${model}) — may take a few minutes` : "Claude"}
                   </p>
                   <Button className="mt-4 w-full" size="lg" icon="spark" onClick={generate} disabled={!subject.materials.length}>
                     {subject.kit ? "Regenerate" : "Generate study kit"}
