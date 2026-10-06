@@ -3,8 +3,15 @@
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 import { useStore } from "@/lib/store";
 import { api } from "@/lib/client-api";
+import { desktop } from "@/lib/desktop";
 
-const AIContext = createContext<{ ai: boolean; model: string | null; checked: boolean }>({ ai: false, model: null, checked: false });
+interface AIState {
+  ai: boolean;
+  model: string | null;
+  checked: boolean;
+  isDesktop: boolean;
+}
+const AIContext = createContext<AIState>({ ai: false, model: null, checked: false, isDesktop: false });
 export const useAI = () => useContext(AIContext);
 
 const noopSubscribe = () => () => {};
@@ -12,7 +19,8 @@ const noopSubscribe = () => () => {};
 export function Providers({ children }: { children: React.ReactNode }) {
   // false during SSR/hydration, true on the client: progress lives in localStorage.
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
-  const [ai, setAi] = useState({ ai: false, model: null as string | null, checked: false });
+  const [ai, setAi] = useState<Omit<AIState, "isDesktop">>({ ai: false, model: null, checked: false });
+  const isDesktop = useSyncExternalStore(noopSubscribe, () => desktop() !== null, () => false);
   const theme = useStore((s) => s.player.theme);
 
   useEffect(() => {
@@ -22,6 +30,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const d = desktop();
+    if (d) document.documentElement.classList.add("is-desktop", `platform-${d.platform}`);
+  }, []);
 
   if (!mounted) {
     return (
@@ -33,5 +46,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-  return <AIContext.Provider value={ai}>{children}</AIContext.Provider>;
+  return <AIContext.Provider value={{ ...ai, isDesktop }}>{children}</AIContext.Provider>;
 }

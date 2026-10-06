@@ -84,8 +84,8 @@ export function SessionFrame({
 }) {
   const meta = MODE_META[mode];
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-2xl flex-col">
-      <div className="sticky top-14 z-20 -mx-4 mb-8 bg-bg/85 px-4 pb-4 pt-2 backdrop-blur lg:top-0 lg:pt-0">
+    <div className="mx-auto flex min-h-[calc(100vh_-_6rem_-_var(--tb))] max-w-2xl flex-col">
+      <div className="sticky top-[calc(3.5rem_+_var(--tb))] z-20 -mx-4 mb-8 bg-bg/85 px-4 pb-4 pt-2 backdrop-blur lg:top-[var(--tb)] lg:pt-0">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
             <IconButton icon="close" label="End session" onClick={onEnd} />

@@ -116,14 +116,14 @@ export function EventLayer() {
 
   return (
     <>
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-16 z-50 flex flex-col items-center gap-2 lg:top-6">
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 top-[calc(4rem_+_var(--tb))] z-50 flex flex-col items-center gap-2 lg:top-[calc(1.5rem_+_var(--tb))]">
         <AnimatePresence>
           {xps.map((e) => (
             <XpPop key={e.id} ev={e} />
           ))}
         </AnimatePresence>
       </div>
-      <div aria-live="polite" className="fixed right-4 top-20 z-50 flex flex-col gap-2 lg:top-6">
+      <div aria-live="polite" className="fixed right-4 top-[calc(5rem_+_var(--tb))] z-50 flex flex-col gap-2 lg:top-[calc(1.5rem_+_var(--tb))]">
         <AnimatePresence>
           {toasts.map((e) =>
             e.kind === "achievement" ? (

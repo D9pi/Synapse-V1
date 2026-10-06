@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { aiEnabled, describeError, generateKitAI } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, describeError, generateKitAI } from "@/lib/ai/claude";
 import { normalizeKit } from "@/lib/ai/normalize";
 import { generateOfflineKit } from "@/lib/offline";
 
@@ -34,6 +34,6 @@ export async function POST(req: Request) {
   const kit = normalizeKit(generateOfflineKit(subjectName, offlineText), "offline");
   return Response.json({
     kit,
-    notice: "AI is not configured, so this kit was built with the offline generator. Add ANTHROPIC_API_KEY for full AI generation.",
+    notice: `AI is off, so this kit was built with the offline generator. ${addKeyHint()} for full AI generation.`,
   });
 }

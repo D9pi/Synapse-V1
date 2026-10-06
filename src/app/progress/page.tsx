@@ -13,7 +13,6 @@ import { cn, dayKey, formatDuration, timeAgo } from "@/lib/utils";
 import { PageHeader } from "@/components/common/bits";
 import { Card, SectionTitle, Chip } from "@/components/ui/Card";
 import { ProgressBar, Meter } from "@/components/ui/Progress";
-import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { BrainMap, regionStats } from "@/components/brain/BrainMap";
 
@@ -58,7 +57,6 @@ export default function ProgressPage() {
   const subjects = useStore((s) => s.subjects);
   const sessions = useStore((s) => s.sessions);
   const setTheme = useStore((s) => s.setTheme);
-  const resetAll = useStore((s) => s.resetAll);
   const lv = playerLevel(player.xp);
   const stats = useMemo(() => regionStats(subjects), [subjects]);
   const [region, setRegion] = useState<RegionId>(() => [...stats].sort((a, b) => b.xp - a.xp)[0]?.id ?? "analytical");
@@ -66,15 +64,7 @@ export default function ProgressPage() {
   const def = regionById(region);
   const [open, setOpen] = useState<string | null>(null);
 
-  const exportData = () => {
-    const s = useStore.getState();
-    const blob = new Blob([JSON.stringify({ player: s.player, subjects: s.subjects, sessions: s.sessions }, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `synapse-${dayKey()}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+
 
   return (
     <div>
@@ -305,25 +295,6 @@ export default function ProgressPage() {
             </div>
           </Card>
 
-          <Card>
-            <SectionTitle>Data</SectionTitle>
-            <p className="mb-4 text-xs text-muted">Your progress is saved in this browser.</p>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" icon="upload" onClick={exportData}>
-                Export
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                icon="trash"
-                onClick={() => {
-                  if (confirm("Reset all progress, subjects, and XP? This cannot be undone.")) resetAll();
-                }}
-              >
-                Reset everything
-              </Button>
-            </div>
-          </Card>
         </div>
       </div>
     </div>

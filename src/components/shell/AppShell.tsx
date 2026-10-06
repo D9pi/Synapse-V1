@@ -10,6 +10,7 @@ import { Icon, type IconName } from "../ui/Icon";
 import { Ring } from "../ui/Progress";
 import { EventLayer } from "./EventLayer";
 import { AssistantDrawer } from "../assistant/AssistantDrawer";
+import { useAI } from "./Providers";
 
 const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "Dashboard", icon: "home" },
@@ -61,11 +62,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const openAssistant = useStore((s) => s.openAssistant);
   const assistantOpen = useStore((s) => s.assistantOpen);
   const inSession = /^\/study\/[^/]+\/[^/]+/.test(path);
+  const { isDesktop } = useAI();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-[calc(100vh_-_var(--tb))]">
+      {isDesktop && (
+        <div className="titlebar" aria-hidden="true">
+          <span className="font-mono text-[10px] tracking-[0.3em] text-faint">SYNAPSE</span>
+        </div>
+      )}
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-line bg-bg px-4 py-6 lg:flex">
+      <aside className="fixed bottom-0 left-0 top-[var(--tb)] z-30 hidden w-60 flex-col border-r border-line bg-bg px-4 py-6 lg:flex">
         <div className="px-2">
           <Logo />
         </div>
@@ -95,15 +102,28 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col gap-2">
+          <Link
+            href="/settings"
+            aria-current={path.startsWith("/settings") ? "page" : undefined}
+            className={cn("flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition-colors", path.startsWith("/settings") ? "bg-surface-2 text-fg" : "text-muted hover:text-fg")}
+          >
+            <Icon name="gear" />
+            Settings
+          </Link>
           <PlayerChip />
         </div>
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-bg/80 px-4 backdrop-blur-xl lg:hidden">
+      <header className="sticky top-[var(--tb)] z-30 flex h-14 items-center justify-between border-b border-line bg-bg/80 px-4 backdrop-blur-xl lg:hidden">
         <Logo />
-        <LevelPill />
+        <div className="flex items-center gap-1">
+          <LevelPill />
+          <Link href="/settings" aria-label="Settings" className="flex h-9 w-9 items-center justify-center rounded-full text-muted hover:text-fg">
+            <Icon name="gear" size={18} />
+          </Link>
+        </div>
       </header>
 
       <main className={cn("lg:pl-60", !inSession && "pb-28 lg:pb-12")}>

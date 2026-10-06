@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { aiEnabled, describeError, extractDocumentAI } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, describeError, extractDocumentAI } from "@/lib/ai/claude";
 
 export const maxDuration = 300;
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return Response.json({ error: "Unsupported file. Upload a PDF, or a text/markdown file." }, { status: 400 });
   if (!aiEnabled()) {
     return Response.json(
-      { error: "Reading PDFs requires AI. Add ANTHROPIC_API_KEY, or paste the text instead." },
+      { error: `Reading PDFs requires AI. ${addKeyHint()}, or paste the text instead.` },
       { status: 503 },
     );
   }

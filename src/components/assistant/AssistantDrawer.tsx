@@ -37,7 +37,7 @@ export function AssistantDrawer() {
           <motion.aside
             role="dialog"
             aria-label="AI study assistant"
-            className="fixed inset-x-0 bottom-0 top-12 z-50 flex flex-col overflow-hidden rounded-t-3xl border border-line-strong bg-surface shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-4 sm:w-[440px] sm:rounded-3xl"
+            className="fixed inset-x-0 bottom-0 top-[calc(3rem_+_var(--tb))] z-50 flex flex-col overflow-hidden rounded-t-3xl border border-line-strong bg-surface shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:top-[calc(1rem_+_var(--tb))] sm:w-[440px] sm:rounded-3xl"
             initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 40, opacity: 0 }}

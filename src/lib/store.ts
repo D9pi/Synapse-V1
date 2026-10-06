@@ -21,6 +21,7 @@ import { playerLevel, subjectLevel, titleFor } from "./levels";
 import { ACHIEVEMENTS } from "./achievements";
 import { DEFAULT_STAT } from "./adaptive";
 import { guessRegion } from "./regions";
+import { desktop } from "./desktop";
 
 /** Transient UI events (XP pops, level ups, unlocks). Not persisted. */
 export type GameEvent =
@@ -154,10 +155,15 @@ function mapSubject(d: Draft, id: string, fn: (s: Subject) => Subject) {
   d.subjects = d.subjects.map((s) => (s.id === id ? fn(s) : s));
 }
 
-/** localStorage wrapper that never throws (private mode, quota exceeded, SSR). */
+/**
+ * Persistence that never throws. In the desktop app progress goes to a file via the
+ * Electron bridge; in a browser it uses localStorage (private mode / quota errors ignored).
+ */
 const safeStorage = {
   getItem: (k: string) => {
     try {
+      const d = desktop();
+      if (d) return d.storage.getItem(k);
       return typeof window === "undefined" ? null : window.localStorage.getItem(k);
     } catch {
       return null;
@@ -165,14 +171,18 @@ const safeStorage = {
   },
   setItem: (k: string, v: string) => {
     try {
-      window.localStorage.setItem(k, v);
+      const d = desktop();
+      if (d) d.storage.setItem(k, v);
+      else window.localStorage.setItem(k, v);
     } catch (err) {
       console.warn("Synapse: could not save progress", err);
     }
   },
   removeItem: (k: string) => {
     try {
-      window.localStorage.removeItem(k);
+      const d = desktop();
+      if (d) d.storage.removeItem(k);
+      else window.localStorage.removeItem(k);
     } catch {
       /* ignore */
     }

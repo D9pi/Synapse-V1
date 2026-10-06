@@ -70,9 +70,15 @@
 
 html {
   background: var(--bg);
+  --tb: 0px; /* desktop title bar height; set by .is-desktop */
+}
+
+html.is-desktop {
+  --tb: 36px;
 }
 
 body {
+  padding-top: var(--tb);
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -249,4 +255,22 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Desktop app title bar (Electron). Draggable; window controls sit on top of it. */
+.titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--tb);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+.titlebar * {
+  -webkit-app-region: drag;
 }

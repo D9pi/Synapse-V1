@@ -4,7 +4,30 @@ A gamified, AI-powered study app. Students add their notes and Synapse turns the
 
 **Notes → AI study guide → flashcards → games and quizzes → progression**
 
-## Quick start
+## Desktop app
+
+Synapse runs as a real desktop app on macOS, Windows, and Linux. It's built with Electron and bundles its own local server, so nothing runs in your browser. Progress is saved to a file on your computer, and you paste your AI key into **Settings** inside the app, where it's encrypted with your system keychain when one is available.
+
+**Build the installer on your own computer** (needs [Node.js](https://nodejs.org) 20.9+):
+
+```bash
+npm install
+npm run dist          # builds an installer for the computer you're on, into release/
+```
+
+- **macOS:** open `release/Synapse-<version>-arm64.dmg` (Apple Silicon) or `-x64.dmg` (Intel), then drag Synapse into Applications.
+- **Windows:** run `release/Synapse-Setup-<version>.exe`.
+- **Linux:** `chmod +x release/Synapse-<version>.AppImage` and run it.
+
+To try it without building an installer, run `npm run desktop`.
+
+**Or download a prebuilt installer:** every push runs the *Desktop app* GitHub Action, which builds all three installers. Open the run under the repo's **Actions** tab and download them from **Artifacts**. Pushing a `v*` tag publishes them as a Release.
+
+The builds aren't signed with paid Apple or Microsoft certificates, so the first launch shows a warning:
+- **macOS:** if it says the app "can't be opened", go to **System Settings → Privacy & Security** and click **Open Anyway**. If it says the app is "damaged", run `xattr -cr /Applications/Synapse.app` once.
+- **Windows:** on the SmartScreen prompt, click **More info → Run anyway**.
+
+## Run in a browser (development)
 
 ```bash
 npm install
@@ -30,6 +53,7 @@ With no API key, everything still works: an offline generator builds study kits 
 ## Architecture
 
 - **Next.js (App Router) + TypeScript + Tailwind v4**, with Framer Motion for animation
+- **Desktop shell** (`electron/`): `main.cjs` starts the Next.js standalone server in a background process on `127.0.0.1` and loads it in a native window. It stores progress in `synapse-data.json` in the app-data folder and the API key in `settings.json`, encrypted with `safeStorage`. `preload.cjs` exposes a small, explicit bridge to the UI. `scripts/after-pack.cjs` copies the server bundle into the packaged app.
 - **State:** a single Zustand store (`src/lib/store.ts`) persisted to `localStorage`. All XP goes through one `grant()` path, which raises level-up, achievement, and mastery events for the UI.
 - **Domain logic** is in pure modules: `levels.ts` (curves and titles), `xp.ts` (economy), `adaptive.ts` (mastery and question selection), `recommend.ts` (the answer to "what should I study now?"), and `achievements.ts`
 - **AI** runs server-side only (`src/lib/ai/claude.ts`) through the Anthropic SDK, using structured outputs validated against Zod schemas (`src/lib/ai/schema.ts`). Responses are normalised into the app's id-based model (`normalize.ts`).

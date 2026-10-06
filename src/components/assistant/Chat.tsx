@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStore } from "@/lib/store";
 import { buildAssistantContext } from "@/lib/context";
@@ -129,7 +130,11 @@ export function Chat({ subjectId, focus, draft, onDraftConsumed, className }: {
               </p>
               {!ai && (
                 <p className="mt-3 max-w-sm rounded-xl border border-dashed border-line px-3 py-2 text-xs text-muted">
-                  AI is offline — add <code className="font-mono">ANTHROPIC_API_KEY</code> to enable live tutoring.
+                  AI is offline.{" "}
+                  <Link href="/settings" className="text-fg underline underline-offset-4">
+                    Add your API key in Settings
+                  </Link>{" "}
+                  to enable live tutoring.
                 </p>
               )}
             </div>

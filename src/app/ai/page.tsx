@@ -37,7 +37,7 @@ export default function AIPage() {
       ];
 
   return (
-    <div className="grid h-[calc(100vh-11rem)] gap-4 lg:h-[calc(100vh-5rem)] lg:grid-cols-[280px_1fr]">
+    <div className="grid h-[calc(100vh_-_11rem_-_var(--tb))] gap-4 lg:h-[calc(100vh_-_5rem_-_var(--tb))] lg:grid-cols-[280px_1fr]">
       <aside className="hidden flex-col gap-4 lg:flex">
         <div>
           <p className="label mb-2">AI</p>

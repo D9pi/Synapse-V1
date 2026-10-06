@@ -8,6 +8,11 @@ const BETAS = ["server-side-fallback-2026-07-01"];
 
 let client: Anthropic | null = null;
 
+/** How to turn AI on, phrased for where the app is running. */
+export function addKeyHint(): string {
+  return process.env.SYNAPSE_DESKTOP ? "Add your Anthropic API key in Settings" : "Add ANTHROPIC_API_KEY to .env.local";
+}
+
 export function aiEnabled(): boolean {
   return Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 }
@@ -29,7 +34,7 @@ export class AIError extends Error {
 /** Maps SDK errors to user-presentable messages. */
 export function describeError(err: unknown): AIError {
   if (err instanceof AIError) return err;
-  if (err instanceof Anthropic.AuthenticationError) return new AIError("The AI key is invalid. Check ANTHROPIC_API_KEY.", 401);
+  if (err instanceof Anthropic.AuthenticationError) return new AIError(`The AI key was rejected. ${process.env.SYNAPSE_DESKTOP ? "Check it in Settings." : "Check ANTHROPIC_API_KEY."}`, 401);
   if (err instanceof Anthropic.RateLimitError) return new AIError("The AI is rate limited right now. Try again in a moment.", 429);
   if (err instanceof Anthropic.BadRequestError) return new AIError(`The AI rejected the request: ${err.message}`, 400);
   if (err instanceof Anthropic.APIConnectionError) return new AIError("Couldn't reach the AI service. Check your connection.", 503);

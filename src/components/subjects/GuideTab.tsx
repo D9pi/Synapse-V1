@@ -231,7 +231,7 @@ export function GuideTab({ subject }: { subject: Subject }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-      <nav aria-label="Guide sections" className="flex flex-col gap-1 lg:sticky lg:top-6 lg:self-start">
+      <nav aria-label="Guide sections" className="flex flex-col gap-1 lg:sticky lg:top-[calc(1.5rem_+_var(--tb))] lg:self-start">
         <div className="mb-2 flex items-center justify-between px-3">
           <span className="label">
             {readCount}/{kit.guide.length} read

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { aiEnabled, describeError, streamAssistant } from "@/lib/ai/claude";
+import { addKeyHint, aiEnabled, describeError, streamAssistant } from "@/lib/ai/claude";
 
 export const maxDuration = 120;
 
@@ -11,7 +11,7 @@ const Body = z.object({
     .max(60),
 });
 
-const OFFLINE_REPLY = `**The AI tutor is offline.** Add an \`ANTHROPIC_API_KEY\` to \`.env.local\` and restart to enable personalised explanations.
+const offlineReply = () => `**The AI tutor is offline.** ${addKeyHint()} to enable personalised explanations.
 
 In the meantime:
 - **Review mode** replays every question you've missed.
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   const encoder = new TextEncoder();
 
   if (!aiEnabled()) {
-    return new Response(OFFLINE_REPLY, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+    return new Response(offlineReply(), { headers: { "Content-Type": "text/plain; charset=utf-8" } });
   }
 
   // The API requires the conversation to start with a user turn.

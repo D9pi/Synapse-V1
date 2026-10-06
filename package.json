@@ -1,12 +1,19 @@
 {
   "name": "synapse",
+  "productName": "Synapse",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "desktop:prepare": "next build && node scripts/prepare-desktop.mjs",
+    "desktop": "npm run desktop:prepare && electron .",
+    "dist": "npm run desktop:prepare && electron-builder",
+    "dist:mac": "npm run desktop:prepare && electron-builder --mac",
+    "dist:win": "npm run desktop:prepare && electron-builder --win",
+    "dist:linux": "npm run desktop:prepare && electron-builder --linux"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -23,9 +30,77 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^44.6.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "description": "Gamified AI study app: notes become a study system, studying becomes progression.",
+  "author": "Synapse",
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "app.synapse.study",
+    "productName": "Synapse",
+    "copyright": "Synapse",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "build/icon.png",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "category": "public.app-category.education",
+      "icon": "build/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "artifactName": "Synapse-${version}-${arch}.${ext}"
+    },
+    "dmg": {
+      "title": "Synapse"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "Synapse-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Synapse"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education",
+      "icon": "build/icon.png",
+      "artifactName": "Synapse-${version}.${ext}"
+    },
+    "publish": null,
+    "afterPack": "scripts/after-pack.cjs"
   }
 }
